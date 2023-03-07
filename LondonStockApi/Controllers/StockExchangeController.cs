@@ -37,6 +37,10 @@ namespace LondonStockApi.Controllers
                 });
             }
 
+            // Validation needs to be introduced to confirm the ticker symbols supplied
+            // are valid and known. If they are not, should the correct ones be added? or should
+            // the entire batch be removed?
+
             var response = await _mediator.Send(new RecordStockExchangesCommand(stockExchanges));
             return Ok(response.StockExchanges.Select(s => new { s.StockExchangeId, s.TickerSymbol, s.BrokerId }));
         }
