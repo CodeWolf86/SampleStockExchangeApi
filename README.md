@@ -11,13 +11,15 @@ but due to time constraints the lower level data interface is not implemented an
 out the box working solution that can be ran even if it's not fully functional.
 
 ## List of MVP additions
-1. Introduction of validation for some of the endpoints, specifically the submission of stock exchanges.
-2. Introduce basic security, ideally an Azure JWT implementation.
-3. Add in the database structure in the database project to allow it to be published to a local SQL Server instance with a post script to add default values.
-4. Implement Entity Framework to bridge the gap between the static data implementation and database project. Refine the relationships between the entities to allow lazy loading of related entities for more complex queries.
-5. Extend CQRS implementation to potentially separate Interfaces for Read and Update which would allow a read only DB Connection string.
-6. Introduce a configuration implementation to pass in configuration values like DB Connection string.
-7. Integration test project to spin up a default database and test the endpoints and data returns with suitable teardown.
+1. Implement validation of requests, especially TickerSymbols supplied on post of exchange information.
+1. Refactor some of the object mapping from Models/Entities DTO's to object mapper or implicit conversions and Unit Testing therein.
+1. Introduce a configuration implementation to pass in configuration values like DB Connection string.
+1. Extend CQRS implementation to potentially separate Interfaces for Read and Write which would allow a read only DB Connection string.
+1. Implement Database project with structure and default data population.
+1. Implement an ORM to remove the static data layer.
+1. Consider basic security policies for the API to restrict access to the endpoints.
+1. Integration test project to spin up a default database and test the endpoints and data returns with suitable teardown.
+
 
 ## NFR considerations
 This will partly roll into enhancements but items to be aware of include:
@@ -33,15 +35,13 @@ This will partly roll into enhancements but items to be aware of include:
 ## Assessment of current MVP
 The current solution will solve the initial problem but it would bottleneck quickly. Either through volume of requests, or through overload of submission of exchange data.
 
-The best way to take it forward would be to make the API front end as light as possible and to hand off to a queue to simply take the message rather than process straight away. The GET's are simple enough and using containers and horizontal scaling behind a load balancer, the GET queries can be taken care of fairly easily, especially if we use cacheing. However given the data may well need to be always the latest, it depends on a suitable time to expire. 
+To handle scaling I would look to containerise the api project and deploy it behind a load balancer as part of an auto-scaling cluster. It would also be worth looking at splitting the read and write api's into different containers so they can be scaled independently. This would allow horizontal scaling of the read api's that can either read directly from a datastore, or from a cache of some form either individually to a container or shared which would be dictated by how long the data is "live" for.
 
-Using Microsoft API Management gateway is also an option, it would provide the load balanced front end and can route to the internal api's deployed via say Kubernetes to restrict external consumption. Kubernetes can then monitor response times and spin up additional instances to allow the API calls to be available.
+The write api's can be deployed into their own containers as the load will be different. Initially this is to handle the submission of the stock exchange information and while this may be fine initially, if the level of load is intermittent, a migration into an asynchronous model may be more beneficial. Handing off any received payloads into an event which is handled by a background worker which subsequently processes htew updates. This could then callback to the requester with an id to confirm that the update has occurred. 
 
-This can also apply to a new worker or azure function project whose role is to process the stock exchange transfer requests. If there are too many, additional worker containers can be spun up to process the influx and dynamically scale where load is tested.
+From a security perspective, use of some form of API management gateway which would handle the authentication of external users before passing through to the microservices may be beneficial. Especially if the link from the Api gateway to the microservices can be locked down via network restrictions removing the need for direct authentication to the services. Allowing the API gateway to handle the authentication with external clients and key rotation making the back end authentication agnostic. Dependent on if knowledge of the caller is required at the service level.
 
-APIM also provides a suitable security solution whereby APIM keys are given to consumers of the API and need to be supplied in order to gain access. The internal microservices can then be whitelisted to certain ip addresses to lockdown access to only known sources. This can be doubly secure using Azure managed identity to make sure the APIM instance can acquire a JWT to access the hosted micro services.
-
-This approach should address the NFR's of security, scaling and reliability, while also allowing easier environment setups through containers.
+This approach should address the NFR's of security, scaling and reliability, while also allowing easier environment setups through containerisation.
 
 
 

@@ -23,16 +23,11 @@ namespace Application.Commands.RecordStockExchangesCommand
                 Price = s.Price,
             });
 
-            // Using an actual ORM would allow the adding of options or a bulk save. 
-            // Mock just to get it passing
-            _context.StockExchange.ToList().AddRange(stockExchanges);
-            await _context.SaveChangesAsync();
-
-            // Temp workaround, add Id and return
-            foreach (var se in command.StockExchanges)
+            foreach(var se in stockExchanges)
             {
-                se.StockExchangeId = Guid.NewGuid();
+                _context.StockExchange.Add(se);
             }
+            await _context.SaveChangesAsync();
 
             return new RecordStockExchangesResult(command.StockExchanges);
         }

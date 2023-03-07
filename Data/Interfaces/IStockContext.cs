@@ -16,8 +16,8 @@ namespace Data.Interfaces
     /// </summary>
     public interface IStockContext
     {
-        IQueryable<StockEntity> Stocks { get; set; }
-        IQueryable<StockExchangeEntity> StockExchange { get; set; }
+        ICollection<StockEntity> Stocks { get; set; }
+        ICollection<StockExchangeEntity> StockExchange { get; set; }
         Task<bool> SaveChangesAsync();
     }
 }

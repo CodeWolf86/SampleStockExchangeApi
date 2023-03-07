@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.Commands.RecordStockExchangesCommand
 {
@@ -8,7 +9,21 @@ namespace Application.Commands.RecordStockExchangesCommand
 
         public RecordStockExchangesResult(IEnumerable<StockExchange> stockExchanges)
         {
-            StockExchanges = stockExchanges;
+            // Temp workaround, add Id to simulate saving to database.
+            if(stockExchanges == null || !stockExchanges.Any())
+            {
+                StockExchanges = new List<StockExchange>();
+            }
+            else
+            {
+                var sList = stockExchanges.ToList();
+                foreach (var se in sList)
+                {
+                    se.StockExchangeId = Guid.NewGuid();
+                }
+
+                StockExchanges = sList;
+            }
         }
     }
 }

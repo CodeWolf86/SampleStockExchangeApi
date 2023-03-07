@@ -23,7 +23,7 @@ namespace Application.UnitTests
         public async Task WhenCallingGetStockQuery_ReturnsNotFound(List<StockEntity> stocks, [Frozen] Mock<IStockContext> stockContext, GetStockQueryHandler handler)
         {
             // Arrange
-            stockContext.Setup(s => s.Stocks).Returns(stocks.AsQueryable());
+            stockContext.Setup(s => s.Stocks).Returns(stocks);
 
             // Act
             var results = await handler.Handle(new GetStockQuery("NWG"), new CancellationToken());
@@ -38,7 +38,7 @@ namespace Application.UnitTests
             // Arrange
             var natWestStock = new StockEntity("NWG", 1.23m);
             stocks.Add(natWestStock);
-            stockContext.Setup(s => s.Stocks).Returns(stocks.AsQueryable());
+            stockContext.Setup(s => s.Stocks).Returns(stocks);
 
             // Act
             var results = await handler.Handle(new GetStockQuery("NWG"), new CancellationToken());

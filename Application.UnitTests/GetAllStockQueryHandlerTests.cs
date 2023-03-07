@@ -22,7 +22,7 @@ namespace Application.UnitTests
         public async Task WhenCallingGetAllStockQuery_ReturnsAllStock(List<StockEntity> stocks, [Frozen] Mock<IStockContext> stockContext, GetAllStockQueryHandler handler)
         {
             // Arrange
-            stockContext.Setup(s => s.Stocks).Returns(stocks.AsQueryable());
+            stockContext.Setup(s => s.Stocks).Returns(stocks);
 
             // Act
             var results = await handler.Handle(new GetAllStockQuery(), new CancellationToken());

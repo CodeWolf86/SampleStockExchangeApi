@@ -12,7 +12,7 @@ namespace Data.Services
 {
     public class StockContext : DbContext, IStockContext
     {
-        public IQueryable<StockEntity> Stocks
+        public ICollection<StockEntity> Stocks
         {
             get
             {
@@ -23,7 +23,7 @@ namespace Data.Services
                             new StockEntity("BARC",171.50m),
                             new StockEntity("NBS", 129.50m),
                             new StockEntity("VMUK",174.55m)
-                    }.AsQueryable();
+                    };
             }
             set
             {
@@ -31,7 +31,7 @@ namespace Data.Services
             }
         }
 
-        public IQueryable<StockExchangeEntity> StockExchange
+        public ICollection<StockExchangeEntity> StockExchange
         {
             get
             {
@@ -48,11 +48,11 @@ namespace Data.Services
                     {
                         BrokerId = Guid.NewGuid(), NumberOfShares= 9000, Price= 1.11m, TickerSymbol = "VMUK"
                     }
-                }.AsQueryable();
+                };
             }
             set
             {
-                //Do nothing, just take the save
+                throw new NotImplementedException();
             }
 
         }
